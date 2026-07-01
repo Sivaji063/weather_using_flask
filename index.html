@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, sans-serif;
+        }
+
+        body {
+            max-width: 500px;
+            margin: 2rem auto;
+            padding: 1rem;
+        }
+
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: none;
+        }
+
+        .card.show {
+            display: block;
+        }
+
+        .temp {
+            font-size: 3rem;
+            font-weight: bold;
+        }
+
+        .error {
+            color: #dc3545;
+            padding: 1rem;
+            background: #f8d7da;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        input {
+            padding: 0.75rem;
+            width: 70%;
+            border: 1px solid #ccc;
+            border-radius: 6px 0 0 6px;
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            background: #00ff88;
+            color: white;
+            border: none;
+            border-radius: 0 6px 6px 0;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Weather App</h1>
+
+    <form id="weather-form">
+        <input type="text" id="city" placeholder="Enter city name..." required>
+        <button type="submit">Get Weather</button>
+    </form>
+
+    <div class="error" id="error"></div>
+
+    <div class="card" id="weather-card">
+        <h2 id="city-name"></h2>
+        <div class="temp" id="temperature"></div>
+        <p id="description"></p>
+        <img id="icon" src="" alt="Weather icon">
+
+        <div class="details">
+            <div>Feels like: <span id="feels-like"></span></div>
+            <div>Humidity: <span id="humidity"></span>%</div>
+            <div>Wind: <span id="wind"></span> m/s</div>
+            <div>Pressure: <span id="pressure"></span> hPa</div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('weather-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const city = document.getElementById('city').value.trim();
+            const errorEl = document.getElementById('error');
+            const card = document.getElementById('weather-card');
+
+            errorEl.classList.remove('show');
+            card.classList.remove('show');
+
+            try {
+                const res = await fetch(`/api/weather?city=${encodeURIComponent(city)}`);
+                const data = await res.json();
+
+                if (!res.ok) throw new Error(data.error);
+
+                document.getElementById('city-name').textContent = data.city;
+                document.getElementById('temperature').textContent = `${data.temperature}${data.units}`;
+                document.getElementById('description').textContent = data.description;
+                document.getElementById('icon').src = data.icon;
+                document.getElementById('feels-like').textContent = `${data.feels_like}${data.units}`;
+                document.getElementById('humidity').textContent = data.humidity;
+                document.getElementById('wind').textContent = data.wind_speed;
+                document.getElementById('pressure').textContent = data.pressure;
+
+                card.classList.add('show');
+            } catch (err) {
+                errorEl.textContent = err.message;
+                errorEl.classList.add('show');
+            }
+        });
+    </script>
+</body>
+
+</html>
